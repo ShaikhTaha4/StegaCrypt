@@ -1,0 +1,97 @@
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <title>Audio Steganography</title>
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+
+        /* Background Video */
+        #bg-video {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1;
+            filter: brightness(40%);
+        }
+
+        /* Centered Container */
+        .container {
+            text-align: center;
+            margin-top: 50px;
+        }
+
+        /* Choice Cards */
+        .choice-card {
+            padding: 20px;
+            margin: 20px;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            box-shadow: 0px 0px 15px rgba(255, 255, 255, 0.2);
+            transition: 0.3s;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .choice-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0px 0px 20px rgba(255, 255, 255, 0.4);
+        }
+
+        .choice-card img {
+            width: 250px;
+            height: 250px;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Video -->
+    <video autoplay muted loop id="bg-video">
+        <source src="{% static 'bgvideo.mp4' %}" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+
+    <!-- Navbar -->
+    {% include "navbar.html" %}
+
+    <div class="container">
+        <h1>Choose an Option</h1>
+        <div class="row justify-content-center">
+            <!-- Encryption -->
+            <div class="col-md-5">
+                <a href="{% url 'audio_encrypt' %}">
+                    <div class="choice-card">
+                        <img src="{% static 'images/audencryption.png' %}" alt="Audio Encryption">
+                        <h3>Encrypt</h3>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Decryption -->
+            <div class="col-md-5">
+                <a href="{% url 'audio_decrypt' %}">
+                    <div class="choice-card">
+                        <img src="{% static 'images/auddecryption.png' %}" alt="Audio Decryption">
+                        <h3>Decrypt</h3>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

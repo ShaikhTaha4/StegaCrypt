@@ -1,0 +1,10 @@
+Copyright (c) 2025 Mohd Taha Zakir Shaikh
+Permission is granted to view, clone, and use this software for personal and educational purposes only.
+
+You are NOT allowed to:
+- Resell this software
+- Use it for commercial purposes without obtaining a commercial license
+
+To purchase a commercial license or for custom development, contact:
+Email: shaikhmohammadtaha@gmail.com
+LinkedIn: Mohammad Taha Shaikh (https://tinyurl.com/taha4)

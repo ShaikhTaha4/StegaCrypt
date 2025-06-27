@@ -1,0 +1,210 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login - Stegacrypt</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Bootstrap CDN -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body, html {
+            height: 100%;
+            color: white;
+            overflow: hidden;
+        }
+
+        #bg-video {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            object-fit: cover;
+            z-index: -1;
+            filter: brightness(30%);
+        }
+
+        .login-container {
+            width: 75%;
+            max-width: 950px;
+            margin: auto;
+            margin-top: 6vh;
+            display: flex;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.15);
+            overflow: hidden;
+        }
+
+        .logo-section {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 30px;
+        }
+
+        .logo-section img {
+            width: 90%;
+            filter: drop-shadow(0 0 20px white);
+        }
+
+        .form-section {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .form-section h2 {
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 32px;
+            color: #fff;
+            text-shadow: 0 0 5px #fff;
+        }
+
+        .form-section input {
+            background: #222;
+            border: 1px solid #444;
+            color: white;
+            padding: 12px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            width: 100%;
+        }
+
+        .form-section .btn {
+            background: #00e6e6;
+            color: black;
+            font-weight: bold;
+            text-transform: uppercase;
+            border: none;
+            border-radius: 5px;
+            padding: 12px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .form-section .btn:hover {
+            background: white;
+            color: black;
+        }
+
+        .form-section .error {
+            color: #ff4d4d;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .btn-forgot {
+            background: none;
+            border: none;
+            color: #ccc;
+            font-size: 14px;
+            text-decoration: underline;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+
+        .btn-forgot:hover {
+            color: yellow;
+        }
+
+        .forgot-message {
+            display: none;
+            margin-top: 15px;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffd700;
+            border-radius: 8px;
+            font-size: 14px;
+            text-align: center;
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @media screen and (max-width: 768px) {
+            .login-container {
+                flex-direction: column;
+                width: 90%;
+                margin-top: 10vh;
+            }
+
+            .logo-section, .form-section {
+                width: 100%;
+                padding: 30px;
+            }
+
+            .logo-section img {
+                width: 70%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Video -->
+    <video autoplay muted loop id="bg-video">
+        <source src="{% static 'bgvideo.mp4' %}" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+
+    <!-- Login Container -->
+    <div class="login-container">
+        <!-- Logo Side -->
+        <div class="logo-section">
+            <img src="{% static 'images/logo.png' %}" alt="Stegacrypt Logo">
+        </div>
+
+        <!-- Login Form Side -->
+        <div class="form-section">
+            <h2>Welcome to Stegacrypt</h2>
+
+            {% if messages %}
+                {% for message in messages %}
+                    <p class="error">{{ message }}</p>
+                {% endfor %}
+            {% endif %}
+
+            <form method="post">
+                {% csrf_token %}
+                <input type="text" name="username" placeholder="Username" required>
+                <input type="password" name="password" placeholder="Password" required>
+                <button type="submit" class="btn">Login</button>
+            </form>
+
+            <button type="button" class="btn-forgot" onclick="showForgotMessage()">Forgot Password?</button>
+            <div id="forgot-msg" class="forgot-message">
+                🔐 Sorry, this system is highly secured.<br>
+                Password reset is restricted.<br>
+                Please contact the designated administrator.
+            </div>
+        </div>
+    </div>
+
+    <!-- Script for Forgot Password -->
+    <script>
+        function showForgotMessage() {
+            document.getElementById("forgot-msg").style.display = "block";
+        }
+    </script>
+</body>
+</html>

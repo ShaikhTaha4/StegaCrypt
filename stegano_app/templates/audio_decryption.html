@@ -1,0 +1,204 @@
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Audio Steganography - Decrypt</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            color: white;
+            font-family: Arial, sans-serif;
+            background: transparent; /* No black background */
+        }
+
+        #bg-video {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1;
+            filter: brightness(40%); /* Keeps video dull */
+        }
+
+        .container {
+            text-align: center;
+            margin-top: 100px;
+        }
+
+        .upload-box {
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            display: inline-block;
+            width: 90%;
+            max-width: 600px;
+        }
+
+        input[type="file"], button {
+            width: 100%;
+            margin-top: 10px;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+        }
+
+        button {
+            background-color: yellow;
+            color: black;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background-color: orange;
+        }
+
+        .message-box {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: rgba(0, 0, 0, 0.6);
+            border-radius: 10px;
+            color: #00e6e6;
+            font-size: 16px;
+            white-space: pre-wrap;
+        }
+
+        .error {
+            margin-top: 10px;
+            color: #ff4d4d;
+            font-weight: bold;
+        }
+
+        .footer {
+            background: rgba(0, 0, 0, 0.9);
+            padding: 20px;
+            font-size: 18px;
+            text-align: center;
+            color: white;
+            margin-top: 40px;
+        }
+
+        /* Progress Bar Styling */
+        #progress-wrapper {
+            display: none;
+            background-color: rgba(255, 255, 255, 0.2);
+            height: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+
+        #progress-bar {
+            height: 100%;
+            width: 0%;
+            background-color: #00e6e6;
+            transition: width 8s linear;
+        }
+
+        #decrypting-text {
+            margin-top: 10px;
+            font-style: italic;
+            color: #cccccc;
+            display: none;
+        }
+    </style>
+
+<script>
+    function handleSubmit(event) {
+        event.preventDefault(); // prevent form submission
+
+        const form = event.target;
+        const progressWrapper = document.getElementById("progress-wrapper");
+        const progressBar = document.getElementById("progress-bar");
+        const decryptingText = document.getElementById("decrypting-text");
+
+        const messages = [
+            "Analyzing waveform...",
+            "Locating LSB patterns...",
+            "Extracting binary data...",
+            "Matching password...",
+            "Decrypting payload...",
+            "Finalizing message..."
+        ];
+
+        let step = 0;
+        decryptingText.innerText = messages[step];
+        progressWrapper.style.display = "block";
+        decryptingText.style.display = "block";
+        progressBar.style.width = "0%";
+
+        const interval = setInterval(() => {
+            step++;
+            if (step < messages.length) {
+                decryptingText.innerText = messages[step];
+            }
+        }, 1300); // update message every 1.3 seconds
+
+        // Animate bar
+        setTimeout(() => {
+            progressBar.style.width = "100%";
+        }, 100);
+
+        // Submit after 8 seconds
+        setTimeout(() => {
+            clearInterval(interval);
+            form.submit();
+        }, 8000);
+    }
+</script>
+</head>
+<body>
+    <video autoplay muted loop id="bg-video">
+        <source src="{% static 'bgvideo.mp4' %}" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+
+    {% include "navbar.html" %}
+
+    <div class="container">
+        <h1>Audio Steganography - Reveal Secret Message</h1>
+
+        <div class="upload-box">
+            <form action="{% url 'audio_decrypt' %}" method="post" enctype="multipart/form-data" onsubmit="handleSubmit(event)">
+                {% csrf_token %}
+                <label>Select Stego Audio (WAV):</label>
+                <input type="file" name="audio" accept=".wav" required>
+
+                <label>Enter Password:</label>
+                <input type="password" name="password" placeholder="Enter the secret password" required>
+
+                <button type="submit">🔍 Reveal Hidden Message</button>
+
+                <div id="progress-wrapper">
+                    <div id="progress-bar"></div>
+                </div>
+
+                <p id="decrypting-text"></p>
+
+
+            </form>
+
+            {% if error %}
+                <p class="error">{{ error }}</p>
+            {% endif %}
+
+            {% if decrypted_message %}
+                <h3 class="mt-4">🔓 Hidden Message:</h3>
+                <div class="message-box">{{ decrypted_message }}</div>
+            {% endif %}
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2025 Stegacrypt | Audio Decryption</p>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,129 @@
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text-in-Video Encryption</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            color: white;
+            font-family: Arial, sans-serif;
+            /* background-color: black; --> removed to allow background video to show */
+        }
+    
+        #bg-video {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1;
+            filter: brightness(25%);
+        }
+    
+        .container {
+            text-align: center;
+            margin-top: 100px;
+        }
+    
+        .upload-box {
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            display: inline-block;
+            width: 50%;
+        }
+    
+        input, textarea, button {
+            margin-top: 10px;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            width: 100%;
+        }
+    
+        button {
+            background-color: yellow;
+            color: black;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+        }
+    
+        button:hover {
+            background-color: orange;
+        }
+    
+        video {
+            margin-top: 20px;
+            max-width: 100%;
+            border-radius: 10px;
+        }
+    
+        .footer {
+            background: rgba(0, 0, 0, 0.9);
+            padding: 20px;
+            font-size: 18px;
+            text-align: center;
+        }
+    
+        small {
+            color: #ccc;
+            display: block;
+        }
+    </style>
+    
+</head>
+<body>
+    <video autoplay muted loop id="bg-video">
+        <source src="{% static 'bgvideo.mp4' %}" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+
+    {% include "navbar.html" %}
+
+    <div class="container">
+        <h1>Text-in-Video Encryption</h1>
+        <p>Select a <strong>video</strong> and enter a <strong>secret message</strong> to embed text into the video.</p>
+
+        <div class="upload-box">
+            <form action="{% url 'video_text_encrypt' %}" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <label for="video"><strong>Upload Video File</strong></label>
+                <input type="file" name="video" id="video" accept="video/*" required>
+                <small>Accepted formats: .mp4, .avi, etc.</small>
+
+                <label for="secret_text"><strong>Enter Secret Text</strong></label>
+                <textarea name="secret_text" id="secret_text" rows="4" placeholder="Type your secret message here..." required></textarea>
+
+                <button type="submit">Encrypt Text into Video</button>
+            </form>
+        </div>
+
+        {% if message %}
+            <h3 style="color: lightgreen; margin-top: 20px;">{{ message }}</h3>
+        {% endif %}
+
+        {% if video_base64 %}
+            <h3 style="margin-top: 30px;">Encrypted Video:</h3>
+            <video controls>
+                <source src="data:video/x-msvideo;base64,{{ video_base64 }}" type="video/x-msvideo">
+                Your browser does not support the video tag.
+            </video>
+            <br><br>
+            <a href="data:video/x-msvideo;base64,{{ video_base64 }}" download="{{ filename }}">
+                <button>Download Encrypted Video</button>
+            </a>
+        {% endif %}
+    </div>
+
+    <footer class="footer text-white">
+        <p>&copy; 2025 Stegacrypt | Text-in-Video Steganography</p>
+    </footer>
+</body>
+</html>

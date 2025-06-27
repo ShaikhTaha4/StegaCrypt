@@ -1,0 +1,180 @@
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <title>Stegacrypt</title>
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            color: white;
+        }
+
+        #bg-video {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1;
+            filter: brightness(25%);
+        }
+
+        .section {
+            width: 100%;
+            padding: 100px 10%;
+            min-height: 90vh;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .section-content {
+            width: 50%;
+            z-index: 2;
+        }
+
+        .section h2 {
+            font-size: 45px;
+            font-weight: bold;
+            text-transform: uppercase;
+            color: white;
+            text-shadow: 0px 0px 15px white;
+            margin-bottom: 15px;
+        }
+
+        .section p {
+            font-size: 18px;
+            line-height: 1.7;
+            margin-bottom: 20px;
+            color: #d1d1d1;
+        }
+
+        .highlight {
+            color: yellow;
+            font-weight: bold;
+        }
+
+        .btn-custom {
+            display: inline-block;
+            background: transparent;
+            color: white;
+            padding: 15px 30px;
+            font-size: 18px;
+            text-decoration: none;
+            text-transform: uppercase;
+            font-weight: bold;
+            border-radius: 5px;
+            border: 2px solid white;
+            transition: 0.3s ease-in-out;
+            box-shadow: 0px 0px 10px white;
+        }
+
+        .btn-custom:hover {
+            background: white;
+            border-color: white;
+            color: black;
+            box-shadow: 0px 0px 20px white;
+        }
+
+        .section-image {
+            width: 45%;
+            text-align: right;
+        }
+
+        .section-image img {
+            width: 90%;
+            max-width: 500px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 20px rgba(255, 255, 255, 0.8);
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 16px;
+            background: rgba(0, 0, 0, 0.95);
+            border-top: 2px solid white;
+        }
+    </style>
+</head>
+<body>
+    <video autoplay muted loop id="bg-video">
+        <source src="{% static 'bgvideo.mp4' %}" type="video/mp4">
+    </video>
+
+    {% include "navbar.html" %}
+
+    <!-- Image Steganography -->
+    <div class="section">
+        <div class="section-content">
+            <h2>Image Steganography</h2>
+            <p>
+                Hide secret <span class="highlight">text messages</span> inside images using <span class="highlight">Least Significant Bit (LSB)</span> manipulation.
+                Ensures the image looks unchanged while carrying hidden information.
+            </p>
+            <a href="{% url 'image_steganography' %}" class="btn-custom">Explore Now</a>
+        </div>
+        <div class="section-image">
+            <img src="{% static 'images/image_steganography.webp' %}" alt="Image Steganography">
+        </div>
+    </div>
+
+    <!-- Video Steganography -->
+    <div class="section">
+        <div class="section-content">
+            <h2>Video Steganography</h2>
+            <p>
+                Conceal <span class="highlight">text messages</span> in video files by embedding data into <span class="highlight">video frame pixels</span> using OpenCV.
+                Allows secure storage of hidden text without affecting video playback.
+            </p>
+            <a href="{% url 'video_steganography' %}" class="btn-custom">Explore Now</a>
+        </div>
+        <div class="section-image">
+            <img src="{% static 'images/video_steganography.webp' %}" alt="Video Steganography">
+        </div>
+    </div>
+
+    <!-- Audio Steganography -->
+    <div class="section">
+        <div class="section-content">
+            <h2>Audio Steganography</h2>
+            <p>
+                Embed <span class="highlight">text data</span> in audio files by modifying the <span class="highlight">LSBs of audio samples</span>.
+                The audio sounds the same but securely holds hidden content.
+            </p>
+            <a href="{% url 'audio_steganography' %}" class="btn-custom">Explore Now</a>
+        </div>
+        <div class="section-image">
+            <img src="{% static 'images/audio_steganography.webp' %}" alt="Audio Steganography">
+        </div>
+    </div>
+
+    <!-- Morph Code -->
+    <div class="section">
+        <div class="section-content">
+            <h2>Morph Code</h2>
+            <p>
+                Convert plain text into formats like <span class="highlight">Binary</span>, <span class="highlight">Hexadecimal</span>, <span class="highlight">Reverse Text</span>, and <span class="highlight">Morse Code</span>.
+                Adds a layer of <span class="highlight">text obfuscation</span> before embedding.
+            </p>
+            <a href="{% url 'morph_code_selection' %}" class="btn-custom">Explore Now</a>
+        </div>
+        <div class="section-image">
+            <img src="{% static 'images/morph_code.webp' %}" alt="Morph Code">
+        </div>
+    </div>
+
+    
+    <footer class="footer text-white">
+        <p>&copy; 2025 Stegacrypt | Developed by Mohammad Taha Shaikh</p>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

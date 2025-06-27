@@ -1,0 +1,136 @@
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Encryption - Image Steganography</title>
+    
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        #bg-video {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1;
+            filter: brightness(40%);
+        }
+        .container {
+            text-align: center;
+            margin-top: 50px;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 30px;
+            border-radius: 10px;
+        }
+        .btn-custom {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid white;
+            color: white;
+            transition: 0.3s;
+        }
+        .btn-custom:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+        }
+        #loadingSection, #successSection {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <video autoplay muted loop id="bg-video">
+        <source src="{% static 'bgvideo.mp4' %}" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+
+    {% include "navbar.html" %}
+
+    <div class="container mt-5">
+        <h1 class="text-center">Encrypt Your Image</h1>
+
+        <!-- Form -->
+        <form id="encryptForm" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="image">Select an Image:</label>
+                <input type="file" class="form-control-file" id="image" name="image" required>
+            </div>
+            <div class="form-group">
+                <label for="text">Enter the Text:</label>
+                <textarea class="form-control" id="text" name="text" rows="3" required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="password">Set a Password:</label>
+                <input type="password" class="form-control" id="password" name="password" required>
+            </div>
+            <button type="submit" class="btn btn-custom">Encrypt</button>
+        </form>
+
+        <!-- Loading Spinner -->
+        <div id="loadingSection" class="mt-4">
+            <div class="spinner-border text-light" role="status">
+                <span class="sr-only">Encrypting...</span>
+            </div>
+            <p>Encrypting your image...</p>
+        </div>
+
+        <!-- Success + Download -->
+        <div id="successSection" class="mt-4">
+            <p class="text-success font-weight-bold">✅ Encryption Complete! Download your image below:</p>
+            <a id="downloadLink" href="#" class="btn btn-success" download>⬇️ Download Encrypted Image</a>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById("encryptForm");
+        const loading = document.getElementById("loadingSection");
+        const success = document.getElementById("successSection");
+        const downloadLink = document.getElementById("downloadLink");
+
+        form.addEventListener("submit", function (e) {
+            e.preventDefault();
+
+            loading.style.display = "block";
+            success.style.display = "none";
+
+            const formData = new FormData(form);
+
+            fetch("{% url 'encryption' %}", {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+                }
+            })
+            .then(response => {
+                if (!response.ok) throw new Error("Failed to encrypt image.");
+                return response.blob();
+            })
+            .then(blob => {
+                const url = URL.createObjectURL(blob);
+                downloadLink.href = url;
+                downloadLink.download = "encrypted_image.png";
+                loading.style.display = "none";
+                success.style.display = "block";
+            })
+            .catch(error => {
+                loading.style.display = "none";
+                alert("❌ Encryption failed: " + error.message);
+            });
+        });
+    </script>
+</body>
+</html>

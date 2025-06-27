@@ -1,0 +1,142 @@
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Decryption - Image Steganography</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        #bg-video {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1;
+            filter: brightness(40%);
+        }
+        .container {
+            text-align: center;
+            margin-top: 50px;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 30px;
+            border-radius: 10px;
+        }
+        .btn-custom {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid white;
+            color: white;
+            transition: 0.3s;
+        }
+        .btn-custom:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        #progress-section {
+            margin-top: 30px;
+            display: none;
+        }
+        .progress {
+            height: 25px;
+        }
+        .progress-bar {
+            font-weight: bold;
+        }
+        .status-text {
+            margin-top: 10px;
+            font-size: 18px;
+            color: #00ffcc;
+        }
+    </style>
+</head>
+<body>
+    <video autoplay muted loop id="bg-video">
+        <source src="{% static 'bgvideo.mp4' %}" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+
+    {% include "navbar.html" %}
+
+    <div class="container mt-5">
+        <h1 class="text-center">Decrypt Text from Image</h1>
+        <form class="mt-5" id="decrypt-form" action="{% url 'decryption' %}" method="post" enctype="multipart/form-data" onsubmit="startProgress(event)">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="image">Encrypted Image:</label>
+                <input type="file" name="image" id="image" class="form-control-file" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Enter Password:</label>
+                <input type="password" class="form-control" id="password" name="password" required>
+            </div>
+            <input type="submit" value="Decrypt" class="btn btn-custom">
+        </form>
+
+        <div id="progress-section">
+            <div class="progress">
+                <div class="progress-bar bg-info" role="progressbar" style="width: 0%">0%</div>
+            </div>
+            <div class="status-text" id="status-text">Initializing...</div>
+        </div>
+
+        {% if text %}
+            <div class="alert alert-success mt-3">
+                <h4>Decrypted Text:</h4>
+                <p>{{ text }}</p>
+            </div>
+        {% endif %}
+        {% if error %}
+            <div class="alert alert-danger mt-3">
+                <h4>Error:</h4>
+                <p>{{ error }}</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <script>
+        const messages = [
+            "Verifying image...",
+            "Extracting data...",
+            "Decoding content...",
+            "Decrypting...",
+            "Finalizing..."
+        ];
+
+        function startProgress(event) {
+            event.preventDefault();
+
+            const form = document.getElementById("decrypt-form");
+            const progressBar = document.querySelector(".progress-bar");
+            const progressSection = document.getElementById("progress-section");
+            const statusText = document.getElementById("status-text");
+
+            progressSection.style.display = "block";
+            let progress = 0;
+            let messageIndex = 0;
+
+            const interval = setInterval(() => {
+                progress += 20;
+                progressBar.style.width = `${progress}%`;
+                progressBar.textContent = `${progress}%`;
+
+                if (messageIndex < messages.length) {
+                    statusText.textContent = messages[messageIndex];
+                    messageIndex++;
+                }
+
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    form.submit();
+                }
+            }, 1000);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,269 @@
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Morph Code Encoder</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            color: white;
+            background: transparent;
+        }
+
+        #bg-video {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1;
+            filter: brightness(35%);
+        }
+
+        .container {
+            text-align: center;
+            margin-top: 100px;
+        }
+
+        .upload-box {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 10px;
+            display: inline-block;
+            width: 90%;
+            max-width: 600px;
+        }
+
+        select, textarea, button {
+            width: 100%;
+            margin-top: 10px;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+        }
+
+        button {
+            background-color: yellow;
+            color: black;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: orange;
+        }
+
+        .output-box {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            margin-top: 15px;
+            border-radius: 5px;
+            display: none;
+            color: white;
+        }
+
+        .progress-container {
+            display: none;
+            margin-top: 15px;
+        }
+
+        .progress-bar {
+            width: 0%;
+            height: 20px;
+            background-color: #4CAF50;
+            border-radius: 5px;
+            transition: width 0.3s;
+        }
+
+        .progress-bg {
+            width: 100%;
+            background-color: #555;
+            border-radius: 5px;
+        }
+
+        .typewriter {
+            overflow: hidden;
+            border-right: .15em solid white;
+            white-space: nowrap;
+            animation: typing 3s steps(40, end), blink-caret .75s step-end infinite;
+        }
+
+        @keyframes typing {
+            from { width: 0 }
+            to { width: 100% }
+        }
+
+        @keyframes blink-caret {
+            from, to { border-color: transparent }
+            50% { border-color: white; }
+        }
+
+        .footer {
+            background: rgba(0, 0, 0, 0.9);
+            padding: 20px;
+            font-size: 18px;
+            text-align: center;
+            color: white;
+            margin-top: 40px;
+        }
+    </style>
+</head>
+<body>
+
+    <video autoplay muted loop id="bg-video">
+        <source src="{% static 'bgvideo.mp4' %}" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+
+    {% include "navbar.html" %}
+
+    <div class="container">
+        <h1>Morph Code Encoder</h1>
+        <p>Choose an encoding type and enter text to morph it.</p>
+
+        <div class="upload-box">
+            <form id="encodeForm">
+                {% csrf_token %}
+                <select name="morph_type" id="morph_type" required>
+                    <option value="">-- Select Morph Type --</option>
+                    <option value="reverse">Reverse Text</option>
+                    <option value="binary">Binary Encode</option>
+                    <option value="hex">Hexadecimal Encode</option>
+                    <option value="dotdash">Morse Code</option>
+                </select>
+                <textarea name="text" id="text" placeholder="Enter text to encode..." required></textarea>
+                <button type="submit">Encode</button>
+            </form>
+
+            <div class="progress-container">
+                <p id="status-message">Encoding Now...</p>
+                <div class="progress-bg">
+                    <div class="progress-bar" id="progress-bar"></div>
+                </div>
+            </div>
+
+            <div class="output-box" id="output-box">
+                <h3>Encoded Morph Code:</h3>
+                <p><strong>Type:</strong> <span id="morph-label"></span></p>
+                <p id="encoded-text" class="typewriter"></p>
+                <button type="button" onclick="copyToClipboard()">📋 Copy</button>
+                <button type="button" onclick="downloadText()">⬇️ Download</button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2025 Stegacrypt | Morph Encoder</p>
+    </footer>
+
+    <script>
+        const MORSE_CODE_DICT = {
+            'A': '.-', 'B': '-...', 'C': '-.-.', 'D': '-..', 'E': '.',
+            'F': '..-.', 'G': '--.', 'H': '....', 'I': '..', 'J': '.---',
+            'K': '-.-', 'L': '.-..', 'M': '--', 'N': '-.', 'O': '---',
+            'P': '.--.', 'Q': '--.-', 'R': '.-.', 'S': '...', 'T': '-',
+            'U': '..-', 'V': '...-', 'W': '.--', 'X': '-..-', 'Y': '-.--',
+            'Z': '--..',
+            '0': '-----', '1': '.----', '2': '..---', '3': '...--', '4': '....-',
+            '5': '.....', '6': '-....', '7': '--...', '8': '---..', '9': '----.',
+            ' ': '/', ',': '--..--', '.': '.-.-.-', '?': '..--..', '!': '-.-.--',
+            ':': '---...', ';': '-.-.-.', "'": '.----.', '"': '.-..-.', '-': '-....-',
+            '/': '-..-.',  '(': '-.--.',  ')': '-.--.-', '&': '.-...',
+            '=': '-...-',  '+': '.-.-.',  '_': '..--.-', '$': '...-..-', '@': '.--.-.'
+        };
+
+        document.getElementById("encodeForm").addEventListener("submit", function (e) {
+            e.preventDefault();
+
+            document.querySelector(".progress-container").style.display = "block";
+            document.getElementById("output-box").style.display = "none";
+            document.getElementById("encoded-text").textContent = "";
+
+            let bar = document.getElementById("progress-bar");
+            let width = 0;
+            let interval = setInterval(() => {
+                if (width >= 100) {
+                    clearInterval(interval);
+
+                    const text = document.getElementById("text").value;
+                    const morphType = document.getElementById("morph_type").value;
+                    let encoded = "";
+
+                    switch (morphType) {
+                        case "reverse":
+                            encoded = text.split('').reverse().join('');
+                            break;
+                        case "binary":
+                            encoded = text.split('').map(char => char.charCodeAt(0).toString(2).padStart(8, '0')).join(' ');
+                            break;
+                        case "hex":
+                            encoded = [...text].map(char => char.charCodeAt(0).toString(16)).join('');
+                            break;
+                        case "dotdash":
+                            encoded = text.toUpperCase().split('').map(char => {
+                                return MORSE_CODE_DICT[char] || '?';
+                            }).join(' ');
+                            break;
+                        default:
+                            encoded = "❌ Invalid encoding type.";
+                    }
+
+                    document.getElementById("morph-label").textContent = morphType.charAt(0).toUpperCase() + morphType.slice(1);
+                    typeWriterEffect(encoded);
+                } else {
+                    width++;
+                    bar.style.width = width + '%';
+                }
+            }, 30);
+        });
+
+        function typeWriterEffect(text) {
+            document.querySelector(".progress-container").style.display = "none";
+            const output = document.getElementById("encoded-text");
+            const box = document.getElementById("output-box");
+            box.style.display = "block";
+            output.classList.remove("typewriter");
+            output.textContent = "";
+
+            let i = 0;
+            const speed = 25;
+
+            function typeChar() {
+                if (i < text.length) {
+                    output.textContent += text.charAt(i);
+                    i++;
+                    setTimeout(typeChar, speed);
+                }
+            }
+            typeChar();
+        }
+
+        function copyToClipboard() {
+            const text = document.getElementById("encoded-text").textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                alert("✅ Copied to clipboard!");
+            }).catch(err => {
+                alert("❌ Failed to copy: " + err);
+            });
+        }
+
+        function downloadText() {
+            const text = document.getElementById("encoded-text").textContent;
+            const blob = new Blob([text], { type: "text/plain" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "encoded_morph.txt";
+            link.click();
+            URL.revokeObjectURL(link.href);
+        }
+    </script>
+</body>
+</html>

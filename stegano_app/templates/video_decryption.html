@@ -1,0 +1,176 @@
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Extraction from Video</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            color: white;
+        }
+
+        #bg-video {
+              position: fixed;
+              top: 0;
+              left: 0;
+              width: 100%;
+               height: 100%;
+               object-fit: cover;
+               z-index: -1;
+               filter: brightness(25%); /* Decreased brightness */
+        }
+
+
+        .container {
+            text-align: center;
+            margin-top: 100px;
+        }
+
+        .upload-box {
+            padding: 30px;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 10px;
+            display: inline-block;
+            width: 50%;
+        }
+
+        input, button {
+            margin-top: 10px;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+        }
+
+        button {
+            background-color: yellow;
+            color: black;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background-color: orange;
+        }
+
+        .extracted-text {
+            margin-top: 30px;
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            color: lightgreen;
+            font-size: 18px;
+            white-space: pre-wrap;
+        }
+
+        .footer {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            font-size: 18px;
+            text-align: center;
+        }
+
+        #progress-section {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .progress-bar {
+            font-weight: bold;
+        }
+
+        .status-text {
+            margin-top: 10px;
+            font-size: 18px;
+            color: #00ffcc;
+        }
+    </style>
+</head>
+<body>
+    <video autoplay muted loop id="bg-video">
+        <source src="{% static 'bgvideo.mp4' %}" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+
+    {% include "navbar.html" %}
+
+    <div class="container">
+        <h1>Extract Hidden Text from Encrypted Video</h1>
+        <p>Upload the encrypted video to recover the hidden message.</p>
+
+        <div class="upload-box">
+            <form action="{% url 'video_text_decrypt' %}" method="post" enctype="multipart/form-data" id="video-form" onsubmit="startProgress(event)">
+                {% csrf_token %}
+                <input type="file" name="video" accept="video/*" required>
+                <button type="submit">Extract Text</button>
+            </form>
+
+            <div id="progress-section">
+                <div class="progress">
+                    <div class="progress-bar bg-info" role="progressbar" style="width: 0%">0%</div>
+                </div>
+                <div class="status-text" id="status-text">Starting decryption...</div>
+            </div>
+        </div>
+
+        {% if extracted_text %}
+            <h3>Extracted Text:</h3>
+            <div class="extracted-text">
+                {{ extracted_text }}
+            </div>
+        {% endif %}
+
+        {% if message %}
+            <h3 style="color: lightgreen;">{{ message }}</h3>
+        {% endif %}
+    </div>
+
+    <footer class="footer text-white">
+        <p>&copy; 2025 Stegacrypt | Text Extraction from Video</p>
+    </footer>
+
+    <script>
+        const videoMessages = [
+            "Reading video...",
+            "Analyzing frames...",
+            "Extracting binary data...",
+            "Decrypting text...",
+            "Finalizing..."
+        ];
+
+        function startProgress(event) {
+            event.preventDefault();
+
+            const form = document.getElementById("video-form");
+            const progressBar = document.querySelector(".progress-bar");
+            const statusText = document.getElementById("status-text");
+            const progressSection = document.getElementById("progress-section");
+
+            progressSection.style.display = "block";
+            let progress = 0;
+            let step = 0;
+
+            const interval = setInterval(() => {
+                progress += 20;
+                progressBar.style.width = progress + "%";
+                progressBar.textContent = progress + "%";
+
+                if (step < videoMessages.length) {
+                    statusText.textContent = videoMessages[step];
+                    step++;
+                }
+
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    form.submit();
+                }
+            }, 1000);
+        }
+    </script>
+</body>
+</html>

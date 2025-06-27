@@ -1,0 +1,190 @@
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Audio Steganography - Encrypt</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            color: white;
+            font-family: Arial, sans-serif;
+            background: transparent;
+        }
+
+        #bg-video {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1;
+            filter: brightness(40%); /* Makes the video duller */
+        }
+
+
+        .container {
+            text-align: center;
+            margin-top: 100px;
+        }
+
+        .upload-box {
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            display: inline-block;
+            width: 90%;
+            max-width: 600px;
+        }
+
+        input, textarea, button {
+            width: 100%;
+            margin-top: 10px;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+        }
+
+        textarea {
+            resize: none;
+        }
+
+        button {
+            background-color: yellow;
+            color: black;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: orange;
+        }
+
+        .progress-container {
+            display: none;
+            margin-top: 15px;
+        }
+
+        .progress {
+            height: 10px;
+            background-color: #444;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            width: 0%;
+            height: 100%;
+            background-color: #ffc107;
+            transition: width 1s ease-in-out;
+        }
+
+        audio {
+            margin-top: 20px;
+        }
+
+        .footer {
+            background: rgba(0, 0, 0, 0.9);
+            padding: 20px;
+            font-size: 18px;
+            text-align: center;
+            color: white;
+            margin-top: 40px;
+        }
+
+        .fade-in {
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+<video autoplay muted loop id="bg-video">
+    <source src="{% static 'bgvideo.mp4' %}" type="video/mp4">
+    Your browser does not support the video tag.
+</video>
+
+{% include "navbar.html" %}
+
+<div class="container fade-in">
+    <h1 class="mb-4">🎧 Audio Steganography - Hide Secret Message</h1>
+
+    <div class="upload-box">
+        <form id="encrypt-form" action="{% url 'audio_encrypt' %}" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <label><strong>Select Cover Audio (WAV):</strong></label>
+            <input type="file" name="audio" accept=".wav" required>
+
+            <label><strong>Enter Secret Message:</strong></label>
+            <textarea name="message" rows="4" placeholder="Enter your secret message..." required></textarea>
+
+            <label><strong>Set a Password:</strong></label>
+            <input type="password" name="password" placeholder="Choose a strong password" required>
+
+            <button type="submit">🔐 Encrypt and Generate</button>
+
+            <div class="progress-container" id="progress-container">
+                <div class="progress mt-3">
+                    <div class="progress-bar" id="progress-bar"></div>
+                </div>
+                <small>Encrypting... Please wait</small>
+            </div>
+        </form>
+
+        {% if audio_file %}
+            <div class="fade-in mt-4">
+                <h3 class="mt-4">✅ Your Stego Audio:</h3>
+                <audio controls>
+                    <source src="{{ audio_file }}" type="audio/wav">
+                    Your browser does not support the audio element.
+                </audio>
+                <br><br>
+                <a href="{{ audio_file }}" download class="btn btn-warning">⬇️ Download Stego Audio</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<footer class="footer">
+    <p>&copy; 2025 Stegacrypt | Audio Encryption</p>
+</footer>
+
+<script>
+    const form = document.getElementById('encrypt-form');
+    const progressBar = document.getElementById('progress-bar');
+    const progressContainer = document.getElementById('progress-container');
+
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        progressContainer.style.display = 'block';
+        progressBar.style.width = '0%';
+
+        let width = 0;
+        const duration = 8000;
+        const intervalTime = 100;
+        const totalTicks = duration / intervalTime;
+        const increment = 100 / totalTicks;
+
+        const interval = setInterval(() => {
+            if (width >= 100) {
+                clearInterval(interval);
+                form.submit();
+            } else {
+                width += increment;
+                progressBar.style.width = width + '%';
+            }
+        }, intervalTime);
+    });
+</script>
+</body>
+</html>

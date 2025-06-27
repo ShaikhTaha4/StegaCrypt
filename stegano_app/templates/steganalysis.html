@@ -1,0 +1,164 @@
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Steganalysis</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        #bg-video {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1;
+            filter: brightness(40%);
+        }
+        .container {
+            text-align: center;
+            margin-top: 50px;
+        }
+        .analysis-card {
+            padding: 20px;
+            margin: 20px;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            box-shadow: 0px 0px 15px rgba(255, 255, 255, 0.2);
+            transition: 0.3s;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .analysis-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0px 0px 20px rgba(255, 255, 255, 0.4);
+        }
+        select, input[type="file"], button {
+            margin-top: 10px;
+        }
+        #progressContainer {
+            margin-top: 30px;
+            display: none;
+        }
+        .progress-bar {
+            transition: width 1s;
+        }
+    </style>
+</head>
+<body>
+    <video autoplay muted loop id="bg-video">
+        <source src="{% static 'bgvideo.mp4' %}" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+
+    {% include "navbar.html" %}
+
+    <div class="container">
+        <h1>Steganalysis - Detect Hidden Messages</h1>
+        <p>Upload an image, video, or audio file to check for hidden messages.</p>
+
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="analysis-card">
+                    <form method="POST" enctype="multipart/form-data" id="analysisForm">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="file_type"><strong>Select File Type</strong></label>
+                            <select name="file_type" id="file_type" class="form-control" onchange="setAcceptAttribute()" required>
+                                <option value="">-- Choose --</option>
+                                <option value="image">Image</option>
+                                <option value="video">Video</option>
+                                <option value="audio">Audio</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="file" class="form-label">Upload File</label>
+                            <input type="file" id="file" class="form-control" name="file" required>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 mt-3">Analyze File</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div id="progressContainer" class="text-center">
+            <p id="phaseMessage" class="text-light font-weight-bold mb-2">Preparing analysis...</p>
+            <div class="progress" style="height: 25px;">
+                <div class="progress-bar bg-info progress-bar-striped progress-bar-animated" 
+                     role="progressbar" 
+                     style="width: 0%;" 
+                     id="progressBar"></div>
+            </div>
+        </div>
+
+        {% if message %}
+        <div class="alert alert-info mt-3 text-center">
+            <strong>{{ message }}</strong>
+        </div>
+        {% endif %}
+
+        <div class="text-center mt-4">
+            <a href="{% url 'index' %}" class="btn btn-secondary">⬅ Back to Home</a>
+        </div>
+    </div>
+
+    <script>
+        function setAcceptAttribute() {
+            const fileInput = document.getElementById("file");
+            const selectedType = document.getElementById("file_type").value;
+
+            if (selectedType === "image") {
+                fileInput.accept = "image/png,image/jpg,image/jpeg";
+            } else if (selectedType === "video") {
+                fileInput.accept = "video/mp4,video/avi,video/mov";
+            } else if (selectedType === "audio") {
+                fileInput.accept = "audio/wav,audio/mp3";
+            } else {
+                fileInput.accept = "";
+            }
+        }
+
+        document.getElementById("analysisForm").addEventListener("submit", function (e) {
+            e.preventDefault(); // Stop immediate form submission
+            const progressContainer = document.getElementById("progressContainer");
+            const progressBar = document.getElementById("progressBar");
+            const phaseMessage = document.getElementById("phaseMessage");
+
+            const phases = [
+                "Initializing analysis...",
+                "Analyzing file structure...",
+                "Extracting binary data...",
+                "Decrypting payload...",
+                "Verifying data integrity..."
+            ];
+
+            progressContainer.style.display = "block";
+            let step = 0;
+
+            const interval = setInterval(() => {
+                if (step < phases.length) {
+                    phaseMessage.innerText = phases[step];
+                    progressBar.style.width = `${(step + 1) * 20}%`;
+                    step++;
+                } else {
+                    clearInterval(interval);
+                    document.getElementById("analysisForm").submit(); // Real form submission
+                }
+            }, 1500); // Total delay = 7.5s
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,85 @@
+{% load static %}
+<style>
+    /* NAVBAR STYLING */
+    .custom-navbar {
+        background: linear-gradient(to right, #111, #222); /* Sleek dark gradient */
+        border-bottom: 3px solid red; /* Red accent */
+        padding: 10px 18px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0px 5px 15px rgba(255, 0, 0, 0.3); /* Subtle glow */
+    }
+
+    /* BRAND LOGO */
+    .navbar-brand img {
+        width: 125px; /* Slightly smaller logo */
+        height: 85px;
+    }
+
+    /* NAVIGATION BUTTONS */
+    .nav-buttons {
+        display: flex;
+        gap: 12px;
+        flex-grow: 1;
+        justify-content: center; /* Centered navigation */
+    }
+
+    .nav-buttons a {
+        text-decoration: none;
+        color: white;
+        font-size: 14px; /* Reduced text size */
+        font-weight: bold;
+        padding: 8px 16px;
+        background: linear-gradient(to right, #222, #333);
+        border: 2px solid red;
+        border-radius: 5px;
+        transition: all 0.3s ease-in-out;
+        text-transform: uppercase;
+    }
+
+    /* BUTTON HOVER EFFECT */
+    .nav-buttons a:hover {
+        background: red;
+        box-shadow: 0px 0px 10px rgba(255, 0, 0, 0.8);
+        transform: scale(1.05);
+    }
+
+    /* LOGOUT BUTTON */
+    .logout-btn {
+        background: red;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        font-size: 14px; /* Reduced text size */
+        font-weight: bold;
+        cursor: pointer;
+        border-radius: 5px;
+        text-transform: uppercase;
+        transition: all 0.3s ease-in-out;
+    }
+
+    .logout-btn:hover {
+        background: rgb(8, 3, 3);
+        box-shadow: 0px 0px 10px rgba(255, 0, 0, 0.8);
+        transform: scale(1.05);
+    }
+</style>
+
+<nav class="navbar custom-navbar">
+    <a class="navbar-brand" href="{% url 'index' %}">
+        <img src="{% static 'images/logo.png' %}" alt="Logo">
+    </a>
+
+    <div class="nav-buttons">
+        <a href="{% url 'image_steganography' %}">Image Steganography</a>
+        <a href="{% url 'video_steganography' %}">Video Steganography</a>
+        <a href="{% url 'audio_steganography' %}">Audio Steganography</a>
+        <a href="{% url 'morph_code_selection' %}">Morph Code Steganography</a>
+    </div>
+
+    <form method="post" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button type="submit" class="logout-btn">Logout</button>
+    </form>
+</nav>
